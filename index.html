@@ -347,20 +347,18 @@
     document.getElementById(id).classList.add('active');
   }
 
-  // ── Webhook caller ──
+  // ── Webhook caller (CORS-safe: no-cors + text/plain skips preflight) ──
   async function callWebhook(payload) {
     const response = await fetch(WEBHOOK_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify(payload)
     });
 
-    if (!response.ok) {
-      const err = await response.text().catch(() => 'Unknown error');
-      throw new Error(err || `HTTP ${response.status}`);
-    }
-
-    return response.json().catch(() => ({}));
+    // With no-cors, response is opaque (status 0, no body readable).
+    // If fetch doesn't throw, the request was sent successfully.
+    return {};
   }
 
   // ── Build base payload ──
