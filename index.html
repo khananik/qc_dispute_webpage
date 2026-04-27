@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Client Inform Response</title>
+<title>Client Inform — Response</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -84,29 +84,6 @@
   /* States */
   .state { display: none; }
   .state.active { display: block; }
-
-  /* Loading */
-  .loading-wrap {
-    text-align: center;
-    padding: 40px 0;
-  }
-
-  .loader {
-    width: 32px;
-    height: 32px;
-    border: 3px solid #ebebeb;
-    border-top-color: #c0392b;
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-    margin: 0 auto 16px;
-  }
-
-  .loading-text {
-    font-size: 14px;
-    color: #888;
-  }
-
-  @keyframes spin { to { transform: rotate(360deg); } }
 
   /* Success */
   .result-icon {
@@ -248,6 +225,8 @@
     border-color: #999;
   }
 
+  @keyframes spin { to { transform: rotate(360deg); } }
+
   .btn .spinner {
     display: inline-block;
     width: 14px;
@@ -297,12 +276,11 @@
       </div>
     </div>
 
-    <!-- State: Loading (acknowledge auto-submit) -->
-    <div class="state" id="stateLoading">
-      <div class="loading-wrap">
-        <div class="loader"></div>
-        <p class="loading-text">Submitting your response…</p>
-      </div>
+    <!-- State: Acknowledge (static thank-you, no webhook) -->
+    <div class="state" id="stateAcknowledge">
+      <div class="result-icon success">&#10003;</div>
+      <h2 class="result-title">Thank you</h2>
+      <p class="result-desc">Your acknowledgment has been recorded. No further action is needed — you can close this page.</p>
     </div>
 
     <!-- State: Dispute form -->
@@ -406,21 +384,6 @@
     }
   }
 
-  // ── Acknowledge (auto-submit on page load) ──
-  async function handleAcknowledge() {
-    showState('stateLoading');
-    try {
-      await callWebhook(basePayload('acknowledge'));
-      document.getElementById('successTitle').textContent = 'Acknowledged';
-      document.getElementById('successDesc').textContent  = 'No further action is needed. You can close this page.';
-      showState('stateSuccess');
-    } catch (err) {
-      document.getElementById('errorDesc').textContent =
-        'We couldn\'t record your acknowledgment. Please try again or email qc@optimizely.com.';
-      showState('stateError');
-    }
-  }
-
   // ── Dispute (form submit) ──
   async function submitDispute() {
     const reason = document.getElementById('disputeReason').value.trim();
@@ -460,16 +423,12 @@
 
   // ── Retry ──
   function retry() {
-    if (ACTION === 'acknowledge') {
-      handleAcknowledge();
-    } else {
-      showState('stateDispute');
-    }
+    showState('stateDispute');
   }
 
   // ── Initialize on page load ──
   if (ACTION === 'acknowledge') {
-    handleAcknowledge();
+    showState('stateAcknowledge');
   } else if (ACTION === 'dispute') {
     showState('stateDispute');
   } else {
