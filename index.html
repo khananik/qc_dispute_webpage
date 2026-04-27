@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Client Inform Response</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #f4f3f0;
+    font-family: 'DM Sans', Arial, sans-serif;
+    color: #222;
+    padding: 40px 16px;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 520px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+
+  /* Header */
+  .header {
+    background: #c0392b;
+    padding: 22px 32px;
+  }
+
+  .brand {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #fff;
+  }
+
+  /* Content */
+  .content {
+    padding: 36px 32px;
+  }
+
+  /* Context card */
+  .context {
+    background: #fafaf9;
+    border: 1px solid #ebebeb;
+    border-radius: 4px;
+    padding: 20px;
+    margin-bottom: 28px;
+  }
+
+  .context-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    font-size: 13px;
+    border-bottom: 1px solid #f2f2f0;
+  }
+
+  .context-row:last-child { border-bottom: none; }
+
+  .context-label {
+    font-weight: 600;
+    color: #999;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    min-width: 100px;
+  }
+
+  .context-value {
+    color: #222;
+    font-weight: 500;
+    text-align: right;
+    max-width: 300px;
+    word-break: break-word;
+  }
+
+  /* States */
+  .state { display: none; }
+  .state.active { display: block; }
+
+  /* Loading */
+  .loading-wrap {
+    text-align: center;
+    padding: 40px 0;
+  }
+
+  .loader {
+    width: 32px;
+    height: 32px;
+    border: 3px solid #ebebeb;
+    border-top-color: #c0392b;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin: 0 auto 16px;
+  }
+
+  .loading-text {
+    font-size: 14px;
+    color: #888;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Success */
+  .result-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 24px;
+  }
+
+  .result-icon.success {
+    background: #f0faf0;
+    border: 2px solid #c6e6c6;
+    color: #2d6a2d;
+  }
+
+  .result-icon.error {
+    background: #fdf2f2;
+    border: 2px solid #f0c6c6;
+    color: #9b2c2c;
+  }
+
+  .result-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #111;
+    text-align: center;
+    margin-bottom: 8px;
+  }
+
+  .result-desc {
+    font-size: 14px;
+    color: #666;
+    text-align: center;
+    line-height: 1.6;
+    max-width: 380px;
+    margin: 0 auto;
+  }
+
+  /* Dispute form */
+  .form-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #111;
+    margin-bottom: 6px;
+  }
+
+  .form-desc {
+    font-size: 14px;
+    color: #666;
+    line-height: 1.6;
+    margin-bottom: 24px;
+  }
+
+  .field-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #999;
+    margin-bottom: 8px;
+  }
+
+  .field-textarea {
+    width: 100%;
+    padding: 14px 16px;
+    font-family: 'DM Sans', Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #333;
+    background: #fff;
+    border: 1.5px solid #d5d5d5;
+    border-radius: 4px;
+    resize: vertical;
+    min-height: 120px;
+    transition: border-color 0.15s ease;
+  }
+
+  .field-textarea:focus {
+    outline: none;
+    border-color: #c0392b;
+  }
+
+  .field-textarea::placeholder { color: #bbb; }
+
+  .field-error {
+    font-size: 12px;
+    color: #c0392b;
+    margin-top: 6px;
+    display: none;
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 28px;
+    font-family: 'DM Sans', Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    text-decoration: none;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .btn-primary {
+    background: #c0392b;
+    color: #fff;
+  }
+
+  .btn-primary:hover:not(:disabled) { background: #a93226; }
+
+  .btn-secondary {
+    background: #fff;
+    color: #444;
+    border: 1.5px solid #d5d5d5;
+  }
+
+  .btn-secondary:hover:not(:disabled) {
+    border-color: #999;
+  }
+
+  .btn .spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+  }
+
+  /* Footer */
+  .footer {
+    padding: 20px 32px;
+    border-top: 1px solid #ebebeb;
+    background: #fafaf9;
+  }
+
+  .footer p {
+    font-size: 11px;
+    color: #bbb;
+    line-height: 1.6;
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="header">
+    <div class="brand">Bain & Company</div>
+  </div>
+
+  <div class="content">
+
+    <!-- Context card (always visible) -->
+    <div class="context" id="contextCard">
+      <div class="context-row">
+        <span class="context-label">Inform ID</span>
+        <span class="context-value" id="ctxInformId">—</span>
+      </div>
+      <div class="context-row">
+        <span class="context-label">Company</span>
+        <span class="context-value" id="ctxCompany">—</span>
+      </div>
+      <div class="context-row">
+        <span class="context-label">Publication</span>
+        <span class="context-value" id="ctxPublication">—</span>
+      </div>
+    </div>
+
+    <!-- State: Loading (acknowledge auto-submit) -->
+    <div class="state" id="stateLoading">
+      <div class="loading-wrap">
+        <div class="loader"></div>
+        <p class="loading-text">Submitting your response…</p>
+      </div>
+    </div>
+
+    <!-- State: Dispute form -->
+    <div class="state" id="stateDispute">
+      <h2 class="form-title">Dispute this mention</h2>
+      <p class="form-desc">Please describe what should be changed or removed. The Bain Marketing Review team will be notified and will follow up with you.</p>
+
+      <label class="field-label" for="disputeReason">Reason for dispute</label>
+      <textarea id="disputeReason" class="field-textarea" placeholder="e.g., The revenue figure cited is outdated and does not reflect our latest disclosure…"></textarea>
+      <p class="field-error" id="fieldError">Please provide a reason for the dispute.</p>
+
+      <div class="form-actions">
+        <button class="btn btn-primary" id="btnSubmit" onclick="submitDispute()">
+          Submit Dispute
+        </button>
+      </div>
+    </div>
+
+    <!-- State: Success -->
+    <div class="state" id="stateSuccess">
+      <div class="result-icon success">&#10003;</div>
+      <h2 class="result-title" id="successTitle">Response submitted</h2>
+      <p class="result-desc" id="successDesc">You can close this page.</p>
+    </div>
+
+    <!-- State: Error -->
+    <div class="state" id="stateError">
+      <div class="result-icon error">&#10007;</div>
+      <h2 class="result-title">Something went wrong</h2>
+      <p class="result-desc" id="errorDesc">We couldn't submit your response. Please try again or contact the QC team at qc@optimizely.com.</p>
+      <div class="form-actions" style="justify-content:center; margin-top:20px;">
+        <button class="btn btn-primary" onclick="retry()">Try Again</button>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    <p>Bain Client Inform System &middot; Bain & Company, Inc.</p>
+  </div>
+</div>
+
+<script>
+  // ── Configuration ──
+  const WEBHOOK_URL = 'https://webhook.opal.optimizely.com/webhooks/9bab15e26f1a484eb4daaafa05302738/c606fa86-25d6-4fd2-9f2f-693d0a4c5078';
+
+  // ── Read URL parameters ──
+  const params   = new URLSearchParams(window.location.search);
+  const ACTION   = params.get('action');          // 'acknowledge' or 'dispute'
+  const INFORM   = params.get('inform_id')   || '';
+  const COMPANY  = params.get('company')     || '';
+  const PUB      = params.get('publication') || '';
+  const GUARDIAN  = params.get('guardian')    || '';
+  const EXCERPTS = params.get('excerpts')    || '[]'; // JSON-encoded array from the agent
+
+  // ── Populate context card ──
+  document.getElementById('ctxInformId').textContent    = INFORM;
+  document.getElementById('ctxCompany').textContent     = COMPANY;
+  document.getElementById('ctxPublication').textContent  = PUB;
+
+  // ── State management ──
+  function showState(id) {
+    document.querySelectorAll('.state').forEach(el => el.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  // ── Webhook caller ──
+  async function callWebhook(payload) {
+    const response = await fetch(WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      const err = await response.text().catch(() => 'Unknown error');
+      throw new Error(err || `HTTP ${response.status}`);
+    }
+
+    return response.json().catch(() => ({}));
+  }
+
+  // ── Build base payload ──
+  function basePayload(action) {
+    return {
+      inform_id:    INFORM,
+      action:       action,
+      company:      COMPANY,
+      publication:  PUB,
+      responded_by: GUARDIAN,
+      responded_at: new Date().toISOString()
+    };
+  }
+
+  // ── Parse excerpts from URL ──
+  function parseExcerpts() {
+    try {
+      return JSON.parse(decodeURIComponent(EXCERPTS));
+    } catch {
+      return [];
+    }
+  }
+
+  // ── Acknowledge (auto-submit on page load) ──
+  async function handleAcknowledge() {
+    showState('stateLoading');
+    try {
+      await callWebhook(basePayload('acknowledge'));
+      document.getElementById('successTitle').textContent = 'Acknowledged';
+      document.getElementById('successDesc').textContent  = 'No further action is needed. You can close this page.';
+      showState('stateSuccess');
+    } catch (err) {
+      document.getElementById('errorDesc').textContent =
+        'We couldn\'t record your acknowledgment. Please try again or email qc@optimizely.com.';
+      showState('stateError');
+    }
+  }
+
+  // ── Dispute (form submit) ──
+  async function submitDispute() {
+    const reason = document.getElementById('disputeReason').value.trim();
+    const errorEl = document.getElementById('fieldError');
+
+    if (!reason) {
+      errorEl.style.display = 'block';
+      return;
+    }
+
+    errorEl.style.display = 'none';
+
+    const btn = document.getElementById('btnSubmit');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>&nbsp;&nbsp;Submitting…';
+
+    try {
+      const payload = {
+        ...basePayload('dispute'),
+        dispute_reason: reason,
+        excerpts: parseExcerpts()
+      };
+
+      await callWebhook(payload);
+
+      document.getElementById('successTitle').textContent = 'Dispute submitted';
+      document.getElementById('successDesc').textContent  = 'The Bain Marketing Review team has been notified and will follow up with you.';
+      showState('stateSuccess');
+    } catch (err) {
+      btn.disabled = false;
+      btn.innerHTML = 'Submit Dispute';
+      document.getElementById('errorDesc').textContent =
+        'We couldn\'t submit your dispute. Please try again or email qc@optimizely.com.';
+      showState('stateError');
+    }
+  }
+
+  // ── Retry ──
+  function retry() {
+    if (ACTION === 'acknowledge') {
+      handleAcknowledge();
+    } else {
+      showState('stateDispute');
+    }
+  }
+
+  // ── Initialize on page load ──
+  if (ACTION === 'acknowledge') {
+    handleAcknowledge();
+  } else if (ACTION === 'dispute') {
+    showState('stateDispute');
+  } else {
+    document.getElementById('errorDesc').textContent = 'Invalid or missing action. Please use the links from your email.';
+    showState('stateError');
+  }
+</script>
+
+</body>
+</html>
